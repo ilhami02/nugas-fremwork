@@ -45,4 +45,10 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function bookmarks()
+    {
+        // Parameter ke-2 ('bookmarks') adalah nama tabel pivot yang kita buat tadi
+        return $this->belongsToMany(Seminar::class, 'bookmarks');
+    }
 }
