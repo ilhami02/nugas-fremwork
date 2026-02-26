@@ -9,14 +9,15 @@ class Seminar extends Model
 {
     use HasFactory;
 
-    // Memberitahu Laravel kolom mana saja yang boleh diisi
     protected $fillable = [
-        'judul', 
-        'pembicara', 
-        'kategori_prodi', 
-        'deskripsi', 
-        'tanggal_acara', 
-        'url_video', 
-        'file_modul'
+        'judul',
+        'pembicara',
+        'kategori_prodi',
+        'deskripsi',
+        'tanggal_acara',
+        'url_video',
+        'file_modul',
+        'views_count',
+        'rangkuman_ai',
     ];
 }
