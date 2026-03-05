@@ -20,4 +20,21 @@ class Seminar extends Model
         'views_count',
         'rangkuman_ai',
     ];
+
+    public function discussions()
+    {
+        return $this->hasMany(Discussion::class)->latest(); // Otomatis urut dari yang terbaru
+    }
+
+    // Relasi ke tabel ratings
+    public function ratings()
+    {
+        return $this->hasMany(Rating::class);
+    }
+
+    // Fungsi bantuan untuk menghitung rata-rata bintang
+    public function averageRating()
+    {
+        return round($this->ratings()->avg('score'), 1) ?? 0;
+    }
 }

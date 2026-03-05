@@ -109,6 +109,47 @@
                             </a>
                         </div>
                     @endif
+                    <div class="my-8 bg-yellow-50 border border-yellow-200 rounded-lg p-6 flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm">
+    
+    <div class="flex items-center">
+        <div class="text-4xl font-black text-yellow-500 mr-4">
+            {{ $seminar->averageRating() }}
+        </div>
+        <div>
+            <div class="flex text-yellow-400 text-xl">
+                @for($i = 1; $i <= 5; $i++)
+                    @if($i <= round($seminar->averageRating()))
+                        ★
+                    @else
+                        <span class="text-gray-300">★</span>
+                    @endif
+                @endfor
+            </div>
+            <p class="text-sm text-gray-500 font-medium mt-1">Berdasarkan {{ $seminar->ratings->count() }} penilaian user</p>
+        </div>
+    </div>
+
+    <div class="bg-white p-3 rounded-lg border border-gray-200 shadow-sm w-full md:w-auto text-center">
+        <p class="text-xs text-gray-600 font-bold mb-2 uppercase tracking-wider">Beri Penilaian Anda</p>
+        <form action="{{ route('rating.store', $seminar->id) }}" method="POST" class="flex items-center justify-center gap-2">
+            @csrf
+            
+            @php
+                $userRating = $seminar->ratings->where('user_id', auth()->id())->first();
+                $currentScore = $userRating ? $userRating->score : 0;
+            @endphp
+
+            @for($i = 1; $i <= 5; $i++)
+                <button type="submit" name="score" value="{{ $i }}" 
+                        class="text-2xl transition hover:scale-125 focus:outline-none {{ $i <= $currentScore ? 'text-yellow-400' : 'text-gray-300 hover:text-yellow-300' }}"
+                        title="Beri nilai {{ $i }} Bintang">
+                    ★
+                </button>
+            @endfor
+        </form>
+    </div>
+    
+</div>
                     @php
                         $isBookmarked = auth()->user()->bookmarks->contains($seminar->id);
                     @endphp
@@ -138,9 +179,6 @@
                 <div class="prose max-w-none text-gray-800 font-sans">
                     {!! Illuminate\Support\Str::markdown($seminar->rangkuman_ai) !!}
                 </div>
-                <!-- <div class="prose max-w-none text-gray-800 whitespace-pre-line font-sans">
-                    {{ $seminar->rangkuman_ai }}
-                </div> -->
                 <div class="mt-4 flex items-center text-xs text-purple-600 italic">
                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     Terverifikasi oleh AI System
@@ -168,14 +206,116 @@
                 </div>
             </div>
         </div>
-    </div>
-</x-app-layout>
+        <div class="mt-12 pt-8 border-t border-gray-200">
+    <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+        <svg class="w-6 h-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"></path></svg>
+        Ruang Diskusi & Q&A ({{ $seminar->discussions->count() }} Pesan)
+    </h3>
 
+    <div class="bg-gray-50 rounded-lg p-6 mb-8 border border-gray-200 shadow-sm">
+        <form action="{{ route('diskusi.store', $seminar->id) }}" method="POST">
+            @csrf
+            <div class="mb-4">
+                <label for="body" class="block text-sm font-medium text-gray-700 mb-2">Punya pertanyaan tentang materi ini? Tulis di sini!</label>
+                <textarea name="body" rows="3" required placeholder="Ketik pertanyaan atau tanggapan Anda..." class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"></textarea>
+            </div>
+            <div class="flex justify-end">
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-md shadow transition duration-150 flex items-center">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+                    Kirim Pesan
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="space-y-6">
+        @forelse($seminar->discussions->whereNull('parent_id') as $diskusi)
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100 flex gap-4">
+                <div class="flex-shrink-0 mt-1">
+                    <div class="h-10 w-10 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-lg shadow">
+                        {{ substr($diskusi->user->name, 0, 1) }}
+                    </div>
+                </div>
+                
+                <div class="flex-grow">
+                    <div class="flex justify-between items-center mb-2">
+                        <h4 class="text-md font-bold text-gray-900">
+                            {{ $diskusi->user->name }}
+                            @if($diskusi->user->is_admin)
+                                <span class="ml-2 bg-purple-100 text-purple-800 text-xs font-semibold px-2 py-0.5 rounded border border-purple-200">Admin</span>
+                            @endif
+                        </h4>
+                        <span class="text-xs text-gray-500">{{ $diskusi->created_at->diffForHumans() }}</span>
+                    </div>
+                    
+                    <p class="text-gray-700 whitespace-pre-line mb-3">{{ $diskusi->body }}</p>
+
+                    <button type="button" onclick="toggleReplyForm('reply-form-{{ $diskusi->id }}')" class="text-sm text-blue-600 hover:text-blue-800 font-semibold flex items-center">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path></svg>
+                        Balas Diskusi Ini
+                    </button>
+
+                    <div id="reply-form-{{ $diskusi->id }}" class="hidden mt-4 bg-gray-50 p-4 rounded border border-gray-200">
+                        <form action="{{ route('diskusi.store', $seminar->id) }}" method="POST">
+                            @csrf
+                            <input type="hidden" name="parent_id" value="{{ $diskusi->id }}">
+                            <textarea name="body" rows="2" required placeholder="Tulis balasan Anda..." class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm mb-3"></textarea>
+                            <div class="flex justify-end gap-2">
+                                <button type="button" onclick="toggleReplyForm('reply-form-{{ $diskusi->id }}')" class="text-gray-600 hover:text-gray-800 text-sm font-medium px-3 py-1">Batal</button>
+                                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-1 px-4 rounded shadow">Kirim Balasan</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    @if($diskusi->replies->count() > 0)
+                        <div class="mt-5 space-y-4 border-l-2 border-blue-200 pl-4 ml-2">
+                            @foreach($diskusi->replies as $reply)
+                                <div class="bg-gray-50 p-4 rounded-lg border border-gray-100 flex gap-3">
+                                    <div class="flex-shrink-0 mt-1">
+                                        <div class="h-8 w-8 rounded-full bg-gray-300 flex items-center justify-center text-gray-700 font-bold text-sm">
+                                            {{ substr($reply->user->name, 0, 1) }}
+                                        </div>
+                                    </div>
+                                    <div class="flex-grow">
+                                        <div class="flex justify-between items-center mb-1">
+                                            <h5 class="text-sm font-bold text-gray-900">
+                                                {{ $reply->user->name }}
+                                                @if($reply->user->is_admin)
+                                                    <span class="ml-2 bg-purple-100 text-purple-800 text-[10px] font-semibold px-2 py-0.5 rounded">Admin</span>
+                                                @endif
+                                            </h5>
+                                            <span class="text-xs text-gray-500">{{ $reply->created_at->diffForHumans() }}</span>
+                                        </div>
+                                        <p class="text-gray-700 text-sm whitespace-pre-line">{{ $reply->body }}</p>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
+                    </div>
+            </div>
+        @empty
+            <div class="text-center py-8 text-gray-500 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+                Belum ada diskusi. Jadilah yang pertama memulai topik!
+            </div>
+        @endforelse
+    </div>
+</div>
+</div>
+</x-app-layout>
 
 <script>
 function copyNotulen() {
     const text = `{!! addslashes($seminar->rangkuman_ai) !!}`;
     navigator.clipboard.writeText(text);
-    // alert('Notulen berhasil disalin!');
-}
+    }
+
+    function toggleReplyForm(formId) {
+        const form = document.getElementById(formId);
+        if (form.classList.contains('hidden')) {
+            form.classList.remove('hidden');
+        } else {
+            form.classList.add('hidden');
+        }
+    }
 </script>
