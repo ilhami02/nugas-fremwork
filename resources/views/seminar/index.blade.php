@@ -4,9 +4,11 @@
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
                 {{ __('Daftar Arsip Seminar') }}
             </h2>
+            @if(auth()->user()->is_admin)
             <a href="{{ route('seminar.create') }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded shadow">
                 + Tambah Arsip
             </a>
+            @endif
         </div>
     </x-slot>
 

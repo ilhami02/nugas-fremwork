@@ -21,12 +21,23 @@
                         {{ __('Arsip Seminar') }}
                     </x-nav-link>
                 </div>
+                <!-- <x-nav-link :href="route('seminar.index')" :active="request()->routeIs('seminar.index')">
+                    {{ __('Daftar Seminar') }}
+                </x-nav-link> -->
+                
                 
                 <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
                     <x-nav-link :href="route('seminar.bookmarks')" :active="request()->routeIs('seminar.bookmarks')">
                         {{ __('Koleksi Saya') }}
                     </x-nav-link>
                 </div>
+
+                
+                @if(Auth::check() && Auth::user()->is_admin)
+                <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')" class="text-purple-600 font-bold">
+                    {{ __('Panel Admin') }}
+                </x-nav-link>
+                @endif
             </div>
 
             <!-- Settings Dropdown -->

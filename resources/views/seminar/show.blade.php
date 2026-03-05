@@ -51,8 +51,10 @@
                     <h1 class="text-3xl font-bold mb-2 text-gray-900">
                         {{ $seminar->judul }}
                     </h1>
+
+                    <!-- @if(auth()->user()->is_admin)
                     <div class="mt-8 mb-4 flex justify-center">
-        <a href="{{ route('seminar.live', $seminar->id) }}" 
+                        <a href="{{ route('seminar.live', $seminar->id) }}" 
            class="group relative inline-flex items-center justify-center px-8 py-3 text-base font-bold text-white transition-all duration-200 bg-red-600 font-pj rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-600 hover:bg-red-700 shadow-lg">
             
             <span class="absolute top-0 right-0 -mt-1 -mr-1 flex h-3 w-3">
@@ -66,7 +68,11 @@
             
             Mulai Live Notulen (Rekam Suara)
         </a>
+        <a href="{{ route('seminar.edit', $seminar->id) }}" class="bg-blue-600 text-white px-4 py-2 rounded">
+            Edit Konten
+        </a>
     </div>
+    @endif -->
 
                     <div class="flex items-center text-sm text-gray-600 mb-6 pb-6 border-b border-gray-200 mt-2">
                         <span class="mr-6 flex items-center">
@@ -129,14 +135,22 @@
 
         @if($seminar->rangkuman_ai)
             <div class="bg-purple-50 border border-purple-200 rounded-lg p-6 shadow-sm">
-                <div class="prose max-w-none text-gray-800 whitespace-pre-line font-sans">
-                    {{ $seminar->rangkuman_ai }}
+                <div class="prose max-w-none text-gray-800 font-sans">
+                    {!! Illuminate\Support\Str::markdown($seminar->rangkuman_ai) !!}
                 </div>
+                <!-- <div class="prose max-w-none text-gray-800 whitespace-pre-line font-sans">
+                    {{ $seminar->rangkuman_ai }}
+                </div> -->
                 <div class="mt-4 flex items-center text-xs text-purple-600 italic">
                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     Terverifikasi oleh AI System
                 </div>
+                <button onclick="copyNotulen()" class="mt-4 text-sm flex items-center text-purple-700 hover:text-purple-900 font-medium">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+                    Salin Notulen
+                </button>
             </div>
+
         @else
             <div class="bg-gradient-to-r from-gray-50 to-gray-100 border border-gray-200 rounded-lg p-8 text-center">
                 <p class="text-gray-600 mb-4">Belum ada rangkuman modul otomatis. Gunakan AI Agent untuk menganalisis video ini.</p>
@@ -156,3 +170,12 @@
         </div>
     </div>
 </x-app-layout>
+
+
+<script>
+function copyNotulen() {
+    const text = `{!! addslashes($seminar->rangkuman_ai) !!}`;
+    navigator.clipboard.writeText(text);
+    // alert('Notulen berhasil disalin!');
+}
+</script>
