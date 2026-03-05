@@ -1,35 +1,41 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Koleksi Seminar Saya') }}
-        </h2>
+        <h2 class="font-semibold text-base" style="color: #0f2c5e;">Koleksi Seminar Saya</h2>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                
-                @forelse ($seminars as $item)
-                    <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 border-t-4 border-yellow-400">
-                        <span class="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-1 rounded">{{ $item->kategori_prodi }}</span>
-                        <h3 class="text-xl font-bold mt-3 mb-2 text-gray-800">{{ $item->judul }}</h3>
-                        
-                        <div class="mt-4">
-                            <a href="{{ route('seminar.show', $item->id) }}" class="text-blue-600 hover:text-blue-800 font-bold text-sm">
-                                Lihat Detail &rarr;
-                            </a>
-                        </div>
-                    </div>
-                @empty
-                    <div class="col-span-3 bg-yellow-50 p-10 text-center text-yellow-800 rounded-lg border border-yellow-200">
-                        <p class="text-lg font-bold">Koleksi Masih Kosong</p>
-                        <p>Anda belum menyimpan materi seminar apa pun.</p>
-                        <a href="{{ route('seminar.index') }}" class="text-blue-600 underline mt-2 inline-block">Cari Seminar</a>
-                    </div>
-                @endforelse
-
+    @if($seminars->isEmpty())
+        <div class="campus-card p-12 text-center max-w-md mx-auto mt-8">
+            <div class="w-14 h-14 rounded-xl mx-auto mb-4 flex items-center justify-center" style="background: #fef9e7;">
+                <svg class="w-8 h-8" style="color: #c8a000;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
+                </svg>
             </div>
+            <p class="font-bold" style="color: #0f2c5e;">Koleksi Masih Kosong</p>
+            <p class="text-sm text-gray-500 mt-1 mb-5">Anda belum menyimpan materi seminar apa pun.</p>
+            <a href="{{ route('seminar.index') }}" class="btn-primary">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                Jelajahi Seminar
+            </a>
         </div>
-    </div>
+    @else
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            @foreach ($seminars as $item)
+                <div class="campus-card campus-card-bookmark p-5 flex flex-col">
+                    <div class="flex items-start justify-between gap-2 mb-3">
+                        <span class="badge-prodi">{{ $item->kategori_prodi }}</span>
+                        <svg class="w-4 h-4 flex-shrink-0" style="color: #c8a000;" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
+                        </svg>
+                    </div>
+                    <h3 class="font-bold text-sm leading-snug mb-3" style="color: #1e293b;">{{ $item->judul }}</h3>
+                    <div class="mt-auto pt-3 border-t border-gray-100">
+                        <a href="{{ route('seminar.show', $item->id) }}" class="btn-primary text-xs w-full justify-center">
+                            Lihat Detail
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                        </a>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    @endif
 </x-app-layout>
