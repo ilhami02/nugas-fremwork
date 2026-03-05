@@ -12,7 +12,17 @@ export default {
     theme: {
         extend: {
             fontFamily: {
-                sans: ['Figtree', ...defaultTheme.fontFamily.sans],
+                sans: ['Inter', ...defaultTheme.fontFamily.sans],
+            },
+            colors: {
+                campus: {
+                    blue: '#0e4b6d',   // primary
+                    'blue-d': '#0a3a55',  // darker blue (hover)
+                    orange: '#ee9b11',   // accent
+                    'orange-l': '#f0a928',// lighter orange (hover)
+                    gray: '#c7c7c5',   // muted / border
+                    dark: '#1f1a17',   // text / near-black
+                },
             },
         },
     },
