@@ -77,21 +77,21 @@ class AdminController extends Controller
     // INI BIAR GEMININYA YANG KERJA, SOALNYA DATA AUDIONYA DI UPLOAD
     // ==========================================
 
-    public function generateAiModulDummy($id)
-    {
-        $seminar = Seminar::findOrFail($id);
-        sleep(2);
+    // public function generateAiModulDummy($id)
+    // {
+    //     $seminar = Seminar::findOrFail($id);
+    //     sleep(2);
         
-        $hasil_ai = "
-        Ringkasan Eksekutif (AI Generated):
-        Berdasarkan analisis rekaman seminar berjudul '{$seminar->judul}', berikut adalah poin-poin kuncinya:
-        ... (dummy text) ...
-        *Catatan: Modul ini digenerate otomatis oleh AI System PNC pada tanggal " . now()->format('d-m-Y H:i') . ".
-        ";
+    //     $hasil_ai = "
+    //     Ringkasan Eksekutif (AI Generated):
+    //     Berdasarkan analisis rekaman seminar berjudul '{$seminar->judul}', berikut adalah poin-poin kuncinya:
+    //     ... (dummy text) ...
+    //     *Catatan: Modul ini digenerate otomatis oleh AI System PNC pada tanggal " . now()->format('d-m-Y H:i') . ".
+    //     ";
 
-        $seminar->update(['rangkuman_ai' => $hasil_ai]);
-        return back()->with('success', 'AI Agent (Simulasi) berhasil membuat modul rangkuman!');
-    }
+    //     $seminar->update(['rangkuman_ai' => $hasil_ai]);
+    //     return back()->with('success', 'AI Agent (Simulasi) berhasil membuat modul rangkuman!');
+    // }
 
     public function liveNotulenPage($id) 
     {
@@ -150,5 +150,60 @@ class AdminController extends Controller
             if (isset($path)) Storage::delete($path);
             return back()->with('error', 'Error Sistem: ' . $e->getMessage());
         }
+    }
+
+    // ini backup kalo misal audio nya mau diupload saja
+    public function uploadVoiceBackup(Request $request, $id)
+    {
+        // 1. Validasi file (Maksimal 20MB agar aman dikirim ke API langsung)
+        $request->validate([
+            'voice_file' => 'required|file|mimes:mp3,wav,ogg,m4a|max:20480', 
+        ]);
+
+        $seminar = Seminar::findOrFail($id);
+        $file = $request->file('voice_file');
+
+        // 2. Simpan file audio ke storage lokal (folder: storage/app/public/voice_backups)
+        $path = $file->store('voice_backups', 'public');
+        
+        // 3. Persiapkan data untuk Gemini
+        // Kita ubah file audio menjadi format Base64 agar bisa dikirim via HTTP
+        $audioContent = base64_encode(file_get_contents(storage_path('app/public/' . $path)));
+        $mimeType = $file->getMimeType();
+        $apiKey = env('GEMINI_API_KEY');
+
+        // 4. Kirim ke Gemini 1.5 Flash (Model yang support Audio)
+        $response = Http::timeout(120)->post("https://generativelanguage.googleapis.com/v1beta/models/ggemini-2.5-flash:generateContent?key={$apiKey}", [
+            'contents' => [
+                [
+                    'parts' => [
+                        ['text' => 'Buatkan rangkuman dan notulen yang sangat rapi, profesional, dan terstruktur berdasarkan rekaman audio seminar ini.'],
+                        [
+                            'inlineData' => [
+                                'mimeType' => $mimeType,
+                                'data' => $audioContent
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+        ]);
+
+        // 5. Proses Balasan dari AI
+        if ($response->successful()) {
+            $result = $response->json();
+
+            // Ambil teks hasil generate AI
+            $rangkuman = $result['candidates'][0]['content']['parts'][0]['text'] ?? 'Gagal memproses isi notulen.';
+
+            // Update database
+            $seminar->update([
+                'rangkuman_ai' => $rangkuman
+            ]);
+
+            return back()->with('success', 'Voice backup berhasil diunggah dan Notulen AI telah digenerate!');
+        }
+
+        return back()->with('error', 'File terunggah, tapi gagal diproses oleh AI. Coba lagi nanti.');
     }
 }

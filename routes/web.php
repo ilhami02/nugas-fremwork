@@ -26,15 +26,13 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     
     // Halaman Utama Dashboard Admin
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
-
-    // Manajemen Seminar (Create, Store, Edit, Update, Destroy)
-    // Perhatikan: kita tetap menggunakan SeminarController untuk CRUD-nya
     Route::resource('seminar', AdminController::class)->except(['index', 'show']);
 
-    // Fitur Live Notulen & AI Agent
+    // Fitur ai gwe
     Route::post('/seminar/{id}/generate-ai', [AdminController::class, 'generateAiModulDummy'])->name('seminar.generate_ai');
     Route::get('/seminar/{id}/live-notulen', [AdminController::class, 'liveNotulenPage'])->name('seminar.live');
     Route::post('/seminar/{id}/process-audio', [AdminController::class, 'processAudio'])->name('seminar.process_audio');
+    Route::post('/seminar/{id}/upload-voice', [AdminController::class, 'uploadVoiceBackup'])->name('seminar.upload_voice');
 });
 
 // =========================================================
@@ -48,10 +46,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/seminar/{id}/diskusi', [DiscussionController::class, 'store'])->name('diskusi.store');
     Route::post('/seminar/{id}/rating', [RatingController::class, 'store'])->name('rating.store');
 
-    // Seminar (User HANYA bisa melihat daftar dan detail)
     Route::resource('seminar', SeminarController::class)->only(['index', 'show']);
 
-    // Fitur Bookmark / Koleksi (Semua user bisa menyimpan koleksi)
     Route::post('/seminar/{id}/bookmark', [SeminarController::class, 'toggleBookmark'])->name('seminar.bookmark');
     Route::get('/koleksi-saya', [SeminarController::class, 'myBookmarks'])->name('seminar.bookmarks');
     });

@@ -76,7 +76,25 @@
                             @endif
                         </div>
 
+                        <div class="bg-white p-6 rounded-xl border border-gray-200 mt-6 shadow-sm">
+                            <h3 class="font-bold text-lg text-campus-blue mb-4">Upload Voice</h3>
+
+                            <form action="{{ route('seminar.upload_voice', $seminar->id) }}" method="POST" enctype="multipart/form-data" class="flex items-center gap-4">
+                                @csrf
+                                <div class="flex-1">
+                                    <input type="file" name="voice_file" accept=".mp3,.wav,.m4a,.ogg" required
+                                            class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring focus:ring-campus-blue/20">
+                                    <p class="text-xs text-gray-500 mt-1">Format: MP3, WAV, M4A. Maksimal 20MB.</p>
+                                </div>
+                                <button type="submit" 
+                                        class="bg-campus-blue hover:bg-campus-blue-d text-white px-5 py-2.5 rounded-lg text-sm font-semibold transition">
+                                    Upload & Generate Notulen
+                                </button>
+                            </form>
+                        </div>
+
                         <hr class="my-8 border-gray-200">
+
 
                         <div class="mb-8">
                             <label for="rangkuman_ai" class="flex items-center text-lg font-bold text-purple-700 mb-2">
