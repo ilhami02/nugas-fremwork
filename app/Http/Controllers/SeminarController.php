@@ -39,7 +39,7 @@ class SeminarController extends Controller
         return view('seminar.show', compact('seminar'));
     }
 
-    // Fitur Bookmark
+    // Fitur Bookmark biar kalo butuh tinggal ke sini aja
     public function toggleBookmark($id)
     {
         $seminar = Seminar::findOrFail($id);
@@ -47,7 +47,7 @@ class SeminarController extends Controller
         return back()->with('success', 'Status koleksi berhasil diperbarui!');
     }
 
-    // Menampilkan daftar seminar yang disimpan user
+    // kalo udah di bookmark nanti disimpan disini
     public function myBookmarks()
     {
         $user = auth()->user();

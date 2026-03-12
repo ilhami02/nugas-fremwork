@@ -12,7 +12,7 @@ class DiscussionController extends Controller
     {
         $request->validate([
             'body' => 'required|string|max:1000',
-            'parent_id' => 'nullable|exists:discussions,id', // Validasi parent_id (opsional)
+            'parent_id' => 'nullable|exists:discussions,id',
         ]);
 
         $seminar = \App\Models\Seminar::findOrFail($id);
@@ -20,7 +20,7 @@ class DiscussionController extends Controller
         Discussion::create([
             'seminar_id' => $seminar->id,
             'user_id' => auth()->id(),
-            'parent_id' => $request->parent_id, // Simpan ID komentar yang dibalas (jika ada)
+            'parent_id' => $request->parent_id,
             'body' => $request->body,
         ]);
 

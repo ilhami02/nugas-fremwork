@@ -15,7 +15,7 @@ class AdminMiddleware
      */
     public function handle(Request $request, Closure $next)
     {
-        // Jika user belum login ATAU bukan admin, lempar balik ke daftar seminar
+        // Jika user belum login atau bukan admin, lempar balik ke daftar seminar
         if (!auth()->check() || !auth()->user()->is_admin) {
             return redirect()->route('seminar.index')->with('error', 'Maaf, halaman ini hanya untuk Admin.');
         }

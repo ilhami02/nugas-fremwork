@@ -21,7 +21,7 @@ class AdminController extends Controller
 
     public function create()
     {
-        return view('seminar.create'); // Jika file create.blade.php mau dipindah ke admin, ubah jadi 'admin.create'
+        return view('admin.create');
     }
 
     public function store(Request $request)
@@ -52,7 +52,6 @@ class AdminController extends Controller
         return redirect()->route('admin.dashboard')->with('success', 'Arsip seminar berhasil ditambahkan!');
     }
 
-    // SESUAI PERMINTAAN: View diarahkan ke folder admin
     public function edit($id)
     {
         $seminar = Seminar::findOrFail($id);
@@ -75,7 +74,7 @@ class AdminController extends Controller
     }
 
     // ==========================================
-    // AREA AI AGENT GEMINI (TIDAK DIUTAK-ATIK)
+    // INI BIAR GEMININYA YANG KERJA, SOALNYA DATA AUDIONYA DI UPLOAD
     // ==========================================
 
     public function generateAiModulDummy($id)

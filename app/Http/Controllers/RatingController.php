@@ -13,7 +13,6 @@ class RatingController extends Controller
             'score' => 'required|integer|min:1|max:5',
         ]);
 
-        // updateOrCreate: Kalau user sudah pernah rating, update nilainya. Kalau belum, buat baru.
         Rating::updateOrCreate(
             ['seminar_id' => $id, 'user_id' => auth()->id()],
             ['score' => $request->score]

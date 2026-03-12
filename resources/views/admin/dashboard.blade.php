@@ -55,7 +55,7 @@
                     <tr class="bg-gray-50 border-b border-campus-gray/30">
                         <th class="py-3 px-5 text-xs font-semibold uppercase tracking-wider text-gray-400">Judul Seminar</th>
                         <th class="py-3 px-5 text-xs font-semibold uppercase tracking-wider text-gray-400">Kategori</th>
-                        <th class="py-3 px-5 text-xs font-semibold uppercase tracking-wider text-gray-400 text-center">Notulen AI</th>
+                        <th class="py-3 px-5 text-xs font-semibold uppercase tracking-wider text-gray-400 text-center">Notulen</th>
                         <th class="py-3 px-5 text-xs font-semibold uppercase tracking-wider text-gray-400 text-center">Aksi</th>
                     </tr>
                 </thead>
@@ -63,7 +63,7 @@
                     @forelse($seminars as $item)
                         <tr class="border-b border-campus-gray/20 hover:bg-campus-blue/5 transition">
                             <td class="py-4 px-5">
-                                <div class="font-semibold text-sm text-campus-dark">{{ $item->judul }}</div>
+                                <a href="{{ route('seminar.show', $item->id) }}" class="text-campus-blue hover:text-campus-blue-d font-semibold">{{ $item->judul }}</a>
                                 <div class="text-xs text-gray-400 mt-0.5">
                                     {{ \Carbon\Carbon::parse($item->tanggal_acara)->format('d M Y') }} &middot; {{ $item->pembicara }}
                                 </div>
