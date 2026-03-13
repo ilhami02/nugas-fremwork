@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Seminar;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
@@ -15,8 +16,9 @@ class AdminController extends Controller
         $totalSeminar = Seminar::count();
         $totalViews = Seminar::sum('views_count');
         $seminars = Seminar::latest()->get();
+        $recentUsers = User::latest()->get();
 
-        return view('admin.dashboard', compact('totalSeminar', 'totalViews', 'seminars'));
+        return view('admin.dashboard', compact('totalSeminar', 'totalViews', 'seminars', 'recentUsers'));
     }
 
     public function create()
@@ -205,5 +207,57 @@ class AdminController extends Controller
         }
 
         return back()->with('error', 'File terunggah, tapi gagal diproses oleh AI. Coba lagi nanti.');
+    }
+
+    public function processYoutube($id)
+    {
+        $seminar = Seminar::findOrFail($id);
+        
+        // Cek apakah admin sudah memasukkan URL Video saat create/edit
+        if (!$seminar->url_video) {
+            return back()->with('error', 'Seminar ini belum memiliki URL Video YouTube. Silakan Edit Konten terlebih dahulu untuk menambahkan URL.');
+        }
+
+        $apiKey = env('GEMINI_API_KEY');
+        $modelName = 'gemini-2.5-flash';
+
+        // Prompt Engineering Cerdas
+        // Kita gabungkan URL dengan metadata seminar agar Gemini punya konteks yang kuat
+        $prompt = "Tolong buatkan notulen atau rangkuman materi yang terstruktur dari video YouTube berikut: " . $seminar->url_video . ".\n\n"
+                . "Sebagai konteks tambahan agar hasil lebih akurat:\n"
+                . "- Judul Acara: " . $seminar->judul . "\n"
+                . "- Pembicara: " . $seminar->pembicara . "\n"
+                . "- Deskripsi Singkat: " . $seminar->deskripsi . "\n\n"
+                . "Tuliskan poin-poin penting, kesimpulan, dan saran seolah-olah Anda adalah notulis profesional yang mengikuti acara tersebut.";
+
+        try {
+            $response = Http::withHeaders([
+                'Content-Type' => 'application/json',
+            ])->post('https://generativelanguage.googleapis.com/v1beta/models/'.$modelName.':generateContent?key=' . $apiKey, [
+                'contents' => [
+                    [
+                        'parts' => [
+                            ['text' => $prompt]
+                        ]
+                    ]
+                ]
+            ]);
+
+            $responseData = $response->json();
+
+            if (isset($responseData['candidates'][0]['content']['parts'][0]['text'])) {
+                $notulen = $responseData['candidates'][0]['content']['parts'][0]['text'];
+                $notulen .= "\n\n---\n*Notulen ini digenerate otomatis oleh AI System melalui analisis tautan YouTube pada " . now()->format('d M Y H:i') . " WIB*";
+                
+                $seminar->update(['rangkuman_ai' => $notulen]);
+                
+                return redirect()->route('seminar.show', $id)->with('success', 'Notulen berhasil ditarik dari referensi YouTube!');
+            } else {
+                return back()->with('error', 'AI gagal merangkum URL tersebut. Coba gunakan fitur Live Notulen atau Upload Suara.');
+            }
+
+        } catch (\Exception $e) {
+            return back()->with('error', 'Error Sistem AI: ' . $e->getMessage());
+        }
     }
 }

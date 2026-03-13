@@ -6,6 +6,7 @@ use App\Http\Controllers\SeminarController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\DiscussionController;
 use App\Http\Controllers\RatingController;
+use App\Http\Controllers\UserController;
 
 Route::get('/', function () {
     if (auth()->check()) {
@@ -27,12 +28,15 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     // Halaman Utama Dashboard Admin
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
     Route::resource('seminar', AdminController::class)->except(['index', 'show']);
+    Route::patch('users/{id}/reset-password', [UserController::class, 'resetPassword'])->name('admin.users.reset_password');
+    Route::resource('users', UserController::class)->names('admin.users')->except(['create', 'store', 'show']); // majamenen user
 
     // Fitur ai gwe
     Route::post('/seminar/{id}/generate-ai', [AdminController::class, 'generateAiModulDummy'])->name('seminar.generate_ai');
     Route::get('/seminar/{id}/live-notulen', [AdminController::class, 'liveNotulenPage'])->name('seminar.live');
     Route::post('/seminar/{id}/process-audio', [AdminController::class, 'processAudio'])->name('seminar.process_audio');
     Route::post('/seminar/{id}/upload-voice', [AdminController::class, 'uploadVoiceBackup'])->name('seminar.upload_voice');
+    Route::post('/seminar/{id}/process-youtube', [AdminController::class, 'processYoutube'])->name('seminar.process_youtube');
 });
 
 // =========================================================

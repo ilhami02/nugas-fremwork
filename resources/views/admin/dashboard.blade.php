@@ -13,7 +13,7 @@
         </div>
     @endif
 
-    <!-- Stat Cards -->
+    {{-- Stat Cards --}}
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-8">
         <div class="bg-white border border-campus-gray/40 border-l-4 border-l-campus-blue rounded-xl shadow-sm p-5 flex items-center gap-4">
             <div class="p-3 rounded-xl bg-campus-blue/10">
@@ -35,7 +35,7 @@
         </div>
     </div>
 
-    <!-- Table -->
+    {{-- Table --}}
     <div class="bg-white border border-campus-gray/40 rounded-xl shadow-sm overflow-hidden">
         <div class="p-5 border-b border-campus-gray/30 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
             <h3 class="flex items-center gap-2 text-lg font-bold text-campus-blue">

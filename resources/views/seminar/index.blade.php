@@ -55,30 +55,53 @@
     <!-- Cards Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         @forelse ($seminars as $item)
-            <div class="bg-white border border-campus-gray/40 border-t-[3px] border-t-campus-blue rounded-xl shadow-sm p-5 flex flex-col transition hover:shadow-md hover:-translate-y-0.5">
-                <div class="flex items-start justify-between gap-2 mb-3">
-                    <span class="inline-block bg-campus-blue/10 text-campus-blue text-[0.7rem] font-bold px-2.5 py-1 rounded-full tracking-wide uppercase">
-                        {{ $item->kategori_prodi }}
-                    </span>
-                    <span class="text-xs text-gray-400 whitespace-nowrap">{{ \Carbon\Carbon::parse($item->tanggal_acara)->format('d M Y') }}</span>
-                </div>
-                <h3 class="font-bold text-sm leading-snug mb-2 text-campus-dark">{{ $item->judul }}</h3>
-                <p class="text-xs text-gray-400 mb-1 flex items-center gap-1">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                    {{ $item->pembicara }}
-                </p>
-                <div class="mt-auto pt-4 border-t border-campus-gray/30 flex gap-2 flex-wrap">
-                    <a href="{{ route('seminar.show', $item->id) }}"
-                       class="inline-flex items-center gap-1.5 bg-campus-blue hover:bg-campus-blue-d text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition shadow-sm">
-                        Lihat Detail
-                    </a>
-                    @if($item->file_modul)
-                        <a href="{{ asset('storage/' . $item->file_modul) }}" target="_blank"
-                           class="inline-flex items-center gap-1.5 bg-gray-100 hover:bg-gray-200 text-campus-dark border border-campus-gray/50 px-3 py-1.5 rounded-lg text-xs font-semibold transition">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                            Unduh Modul
+            <div class="bg-white border border-campus-gray/40 border-t-[3px] border-t-campus-blue rounded-xl shadow-sm flex flex-col transition hover:shadow-md hover:-translate-y-0.5 overflow-hidden">
+                {{-- Area konten (klik → detail) --}}
+                <a href="{{ route('seminar.show', $item->id) }}" class="block p-5 flex-1">
+                    <div class="flex items-start justify-between gap-2 mb-3">
+                        <span class="inline-block bg-campus-blue/10 text-campus-blue text-[0.7rem] font-bold px-2.5 py-1 rounded-full tracking-wide uppercase">
+                            {{ $item->kategori_prodi }}
+                        </span>
+                        <span class="text-xs text-gray-400 whitespace-nowrap">{{ \Carbon\Carbon::parse($item->tanggal_acara)->format('d M Y') }}</span>
+                    </div>
+                    <h3 class="font-bold text-sm leading-snug mb-2 text-campus-dark">{{ $item->judul }}</h3>
+                    <p class="text-xs text-gray-400 flex items-center gap-1">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                        {{ $item->pembicara }}
+                    </p>
+                </a>
+
+                {{-- Area bawah: tombol aksi --}}
+                @php $isBookmarked = auth()->user()->bookmarks->contains($item->id); @endphp
+                <div class="px-5 py-3 border-t border-campus-gray/30 flex items-center justify-between gap-2">
+                    <div class="flex gap-2 flex-wrap">
+                        <a href="{{ route('seminar.show', $item->id) }}"
+                           class="inline-flex items-center gap-1.5 bg-campus-blue hover:bg-campus-blue-d text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition shadow-sm">
+                            Lihat Detail
                         </a>
-                    @endif
+                        @if($item->file_modul)
+                            <a href="{{ asset('storage/' . $item->file_modul) }}" target="_blank"
+                               class="inline-flex items-center gap-1.5 bg-gray-100 hover:bg-gray-200 text-campus-dark border border-campus-gray/50 px-3 py-1.5 rounded-lg text-xs font-semibold transition">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                                Unduh
+                            </a>
+                        @endif
+                    </div>
+
+                    {{-- Tombol Bookmark --}}
+                    <form class="bookmark-form" action="{{ route('seminar.bookmark', $item->id) }}" method="POST">
+                        @csrf
+                        <button type="submit"
+                                data-bookmarked="{{ $isBookmarked ? 'true' : 'false' }}"
+                                title="{{ $isBookmarked ? 'Hapus dari Koleksi' : 'Simpan ke Koleksi' }}"
+                                class="bookmark-btn p-1.5 rounded-lg transition {{ $isBookmarked ? 'text-campus-orange' : 'text-campus-gray hover:text-campus-orange' }}">
+                            <svg class="w-5 h-5" stroke="currentColor" viewBox="0 0 24 24"
+                                 fill="{{ $isBookmarked ? 'currentColor' : 'none' }}">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
+                            </svg>
+                        </button>
+                    </form>
                 </div>
             </div>
         @empty
@@ -94,3 +117,42 @@
         @endforelse
     </div>
 </x-app-layout>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.bookmark-form').forEach(function (form) {
+        form.addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const btn  = form.querySelector('.bookmark-btn');
+            const svg  = btn.querySelector('svg');
+            const csrf = form.querySelector('[name=_token]').value;
+            const wasBookmarked = btn.dataset.bookmarked === 'true';
+
+            try {
+                await fetch(form.action, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: `_token=${encodeURIComponent(csrf)}`
+                });
+
+                const nowBookmarked = !wasBookmarked;
+                btn.dataset.bookmarked = nowBookmarked.toString();
+                btn.title = nowBookmarked ? 'Hapus dari Koleksi' : 'Simpan ke Koleksi';
+
+                if (nowBookmarked) {
+                    btn.classList.remove('text-campus-gray', 'hover:text-campus-orange');
+                    btn.classList.add('text-campus-orange');
+                    svg.setAttribute('fill', 'currentColor');
+                } else {
+                    btn.classList.remove('text-campus-orange');
+                    btn.classList.add('text-campus-gray', 'hover:text-campus-orange');
+                    svg.setAttribute('fill', 'none');
+                }
+            } catch (err) { console.error('Bookmark error:', err); }
+        });
+    });
+});
+</script>
